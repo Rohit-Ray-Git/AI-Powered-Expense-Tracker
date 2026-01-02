@@ -13,6 +13,9 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL || 'postgresql://dev_user:dev_password@localhost:5432/expense_tracker'
 });
 
+import authRoutes from './routes/auth';
+app.use('/api/auth', authRoutes);
+
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });
