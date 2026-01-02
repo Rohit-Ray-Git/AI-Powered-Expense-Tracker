@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
+import { motion } from 'framer-motion';
 
 export default function Register() {
     const [email, setEmail] = useState('');
@@ -20,45 +21,84 @@ export default function Register() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-100">
-            <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-                <h2 className="mb-6 text-center text-2xl font-bold text-gray-900">Create Account</h2>
-                {error && <p className="mb-4 text-center text-sm text-red-600">{error}</p>}
-                <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex min-h-screen items-center justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="glass-panel w-full max-w-md rounded-2xl p-8 backdrop-blur-xl"
+            >
+                <div className="mb-8 text-center">
+                    <motion.h1
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-3xl font-bold text-emerald-400 mb-2"
+                    >
+                        Create Account
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="text-gray-400"
+                    >
+                        Start your financial journey
+                    </motion.p>
+                </div>
+
+                {error && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="mb-6 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400 text-center"
+                    >
+                        {error}
+                    </motion.div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Email</label>
-                        <input
+                        <label className="block text-xs font-medium text-emerald-400/80 uppercase tracking-wider mb-2">Email</label>
+                        <motion.input
+                            whileFocus={{ scale: 1.01, borderColor: "rgba(16, 185, 129, 0.8)" }}
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                            className="input-field block w-full rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500/50 placeholder-gray-600"
+                            placeholder="you@example.com"
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Password</label>
-                        <input
+                        <label className="block text-xs font-medium text-emerald-400/80 uppercase tracking-wider mb-2">Password</label>
+                        <motion.input
+                            whileFocus={{ scale: 1.01, borderColor: "rgba(16, 185, 129, 0.8)" }}
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                            className="input-field block w-full rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500/50 placeholder-gray-600"
+                            placeholder="••••••••"
                             required
                         />
                     </div>
-                    <button
+                    <motion.button
+                        whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(16, 185, 129, 0.4)" }}
+                        whileTap={{ scale: 0.98 }}
                         type="submit"
-                        className="w-full rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="btn-primary w-full rounded-lg py-3 text-sm uppercase tracking-wide shadow-lg"
                     >
-                        Register
-                    </button>
+                        Create Account
+                    </motion.button>
                 </form>
-                <p className="mt-4 text-center text-sm text-gray-600">
+
+                <p className="mt-8 text-center text-sm text-gray-400">
                     Already have an account?{' '}
-                    <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-                        Login
+                    <Link to="/login" className="font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
+                        Sign In
                     </Link>
                 </p>
-            </div>
+            </motion.div>
         </div>
     );
 }
