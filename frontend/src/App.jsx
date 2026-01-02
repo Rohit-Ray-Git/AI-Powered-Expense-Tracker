@@ -20,15 +20,7 @@ const ProtectedRoute = ({ children }) => {
 };
 
 // Placeholder Home Page
-const Dashboard = () => {
-  const { logout, user } = useAuthStore();
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Welcome, {user?.email}</h1>
-      <button onClick={logout} className="px-4 py-2 bg-red-500 text-white rounded">Logout</button>
-    </div>
-  )
-}
+import Dashboard from './pages/Dashboard';
 
 function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
