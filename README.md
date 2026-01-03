@@ -10,6 +10,9 @@ Traditional expense trackers are passive—they just record what you spent. This
 
 ### 🤖 AI Financial Coach
 The standout feature of this app. It doesn't just show charts; it *understands* them.
+
+![AI Coach & Chat](assets/advisor.png)
+
 *   **Smart Audits**: Automatically scans your recent transactions to find savings opportunities (e.g., "You spent ₹2,000 on coffee this month. Cutting back could save you ₹24k/year").
 *   **Interactive Chat**: Have a conversation with your data! Ask questions like *"Can I afford a vacation?"* or *"How much did I spend on Uber?"*, and get instant, personalized answers.
 
@@ -19,6 +22,9 @@ Stop manually selecting categories. The **ML Service** analyzes merchant names a
 ### 📊 Comprehensive Dashboard
 *   **Overview**: Quick snapshot of total spend and recent activity.
 *   **Analysis**: Deep dive into spending patterns with interactive charts.
+
+![Deep Dive Analysis](assets/analysis.png)
+
 *   **Budgets**: Set monthly limits for specific categories and track progress.
 
 ---
