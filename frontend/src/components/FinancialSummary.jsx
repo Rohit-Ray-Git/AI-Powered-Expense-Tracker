@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import HoloCard from './HoloCard';
 
 export default function FinancialSummary({ expenses }) {
     const stats = useMemo(() => {
@@ -20,25 +20,25 @@ export default function FinancialSummary({ expenses }) {
 
     return (
         <div className="grid grid-cols-2 gap-4">
-            <div className="glass-panel p-4 rounded-xl flex flex-col justify-center">
-                <span className="text-gray-400 text-xs uppercase tracking-wider mb-1">Total Spent</span>
-                <span className="text-2xl font-bold text-emerald-400">₹{stats.total.toFixed(2)}</span>
-            </div>
+            <HoloCard variant="emerald" className="p-4 flex flex-col justify-center">
+                <span className="text-emerald-100/60 text-xs uppercase tracking-wider mb-1">Total Spent</span>
+                <span className="text-2xl font-bold text-white">₹{stats.total.toFixed(2)}</span>
+            </HoloCard>
 
-            <div className="glass-panel p-4 rounded-xl flex flex-col justify-center">
-                <span className="text-gray-400 text-xs uppercase tracking-wider mb-1">Transactions</span>
+            <HoloCard variant="purple" className="p-4 flex flex-col justify-center">
+                <span className="text-purple-100/60 text-xs uppercase tracking-wider mb-1">Transactions</span>
                 <span className="text-2xl font-bold text-white">{stats.count}</span>
-            </div>
+            </HoloCard>
 
-            <div className="glass-panel p-4 rounded-xl flex flex-col justify-center col-span-2">
+            <HoloCard variant="blue" className="p-4 flex flex-col justify-center col-span-2">
                 <div className="flex justify-between items-end">
                     <div>
-                        <span className="text-gray-400 text-xs uppercase tracking-wider mb-1">Top Category</span>
+                        <span className="text-blue-100/60 text-xs uppercase tracking-wider mb-1">Top Category</span>
                         <div className="text-lg font-medium text-white flex items-center gap-2">
                             {stats.topCategory ? (
                                 <>
                                     <span>{stats.topCategory[0]}</span>
-                                    <span className="text-emerald-400 text-sm">(₹{stats.topCategory[1].toFixed(2)})</span>
+                                    <span className="text-blue-200 text-sm">(₹{stats.topCategory[1].toFixed(2)})</span>
                                 </>
                             ) : (
                                 <span>-</span>
@@ -46,7 +46,7 @@ export default function FinancialSummary({ expenses }) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </HoloCard>
         </div>
     );
 }
