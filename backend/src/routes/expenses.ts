@@ -25,6 +25,61 @@ router.get('/', authenticateToken, async (req: any, res: Response) => {
     }
 });
 
+// Get spending trends
+router.get('/trends', authenticateToken, async (req: any, res: Response) => {
+    const { timeframe, endDate, startDate } = req.query;
+
+    let truncateUnit;
+    switch (timeframe) {
+        case 'weekly': truncateUnit = 'week'; break;
+        case 'monthly': truncateUnit = 'month'; break;
+        case 'daily': default: truncateUnit = 'day'; break;
+    }
+
+    try {
+        const queryParams: any[] = [truncateUnit, req.user.id];
+        let dateCondition = '';
+        let orderByClause = 'ORDER BY period DESC'; // Default latest
+        let limitClause = 'LIMIT 30';
+        let shouldReverse = true; // Default reverse for latest
+
+        if (startDate && endDate) {
+            queryParams.push(startDate, endDate);
+            dateCondition = 'AND created_at >= $3 AND created_at <= $4';
+            orderByClause = 'ORDER BY period ASC'; // Chronological
+            limitClause = ''; // No limit
+            shouldReverse = false; // Already chronological
+        } else if (endDate) {
+            queryParams.push(endDate);
+            dateCondition = 'AND created_at <= $3';
+        }
+
+        const result = await pool.query(
+            `SELECT 
+                DATE_TRUNC($1, created_at) as period, 
+                SUM(amount) as total_amount
+             FROM expenses 
+             WHERE user_id = $2 ${dateCondition}
+             GROUP BY period 
+             ${orderByClause}
+             ${limitClause}`,
+            queryParams
+        );
+
+        if (shouldReverse) {
+            const final = result.rows.reverse();
+            console.log('Trends Response:', JSON.stringify(final));
+            res.json(final);
+        } else {
+            console.log('Trends Response:', JSON.stringify(result.rows));
+            res.json(result.rows);
+        }
+    } catch (error) {
+        console.error('Trend Error:', error);
+        res.status(500).json({ error: 'Failed to fetch trends' });
+    }
+});
+
 // Add a new expense
 import axios from 'axios';
 

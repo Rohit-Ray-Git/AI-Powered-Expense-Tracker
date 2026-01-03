@@ -84,19 +84,28 @@ async function seed() {
                 catMap[cat.name] = res.rows[0].id;
             }
 
-            // 3. Insert Transactions (Spread over last 30 days)
+            console.log('Category Map:', catMap);
+
+            // 3. Insert Transactions (Spread over last 90 days)
             for (const t of transactions) {
-                // Random date within last 30 days
-                const daysAgo = Math.floor(Math.random() * 30);
+                // Random date within last 90 days
+                const daysAgo = Math.floor(Math.random() * 90);
                 const date = new Date();
                 date.setDate(date.getDate() - daysAgo);
+                console.log(`Inserting date: ${date.toISOString()} (daysAgo: ${daysAgo})`);
 
-                await pool.query(
-                    `INSERT INTO expenses (user_id, amount, description, category_id, merchant_name, created_at)
-                     VALUES ($1, $2, $3, $4, $5, $6)`,
-                    [userId, t.amount, t.desc, catMap[t.cat], t.merchant, date]
-                );
+                try {
+                    await pool.query(
+                        `INSERT INTO expenses (user_id, amount, description, category_id, merchant_name, created_at)
+                         VALUES ($1, $2, $3, $4, $5, $6)`,
+                        [userId, t.amount, t.desc, catMap[t.cat], t.merchant, date]
+                    );
+                    process.stdout.write('.');
+                } catch (e) {
+                    console.error('Insert Failed:', e.message);
+                }
             }
+            console.log(' User done.');
         }
 
         console.log('✅ Seeding complete! Added ~' + transactions.length + ' transactions per user.');

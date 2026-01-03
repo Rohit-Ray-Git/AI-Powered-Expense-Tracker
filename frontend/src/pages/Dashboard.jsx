@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import useAuthStore from '../store/useAuthStore';
 import useExpenseStore from '../store/useExpenseStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { format, addMonths, subMonths, isSameMonth, startOfMonth, endOfMonth } from 'date-fns';
 import ExpensesPieChart from '../components/ExpensesPieChart';
 import FinancialSummary from '../components/FinancialSummary';
-import MonthlyBarChart from '../components/MonthlyBarChart';
+import SpendingTrends from '../components/SpendingTrends';
 import BudgetSection from '../components/BudgetSection';
 import SpendingInsights from '../components/SpendingInsights';
 import AdvisorTab from '../components/AdvisorTab';
+import CategoryBreakdown from '../components/CategoryBreakdown';
 
 const Dashboard = () => {
     const { user, logout } = useAuthStore();
@@ -32,6 +34,23 @@ const Dashboard = () => {
         category_id: '',
         merchant_name: ''
     });
+
+    // Month View State
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+
+    const handlePrevMonth = () => setCurrentMonth(prev => subMonths(prev, 1));
+    const handleNextMonth = () => setCurrentMonth(prev => addMonths(prev, 1));
+
+    // Filter expenses for the specific selected month
+    const getFilteredExpenses = () => {
+        if (!expenses) return [];
+        return expenses.filter(e => {
+            const expDate = new Date(e.created_at);
+            return isSameMonth(expDate, currentMonth);
+        });
+    };
+
+    const filteredExpenses = getFilteredExpenses();
 
     useEffect(() => {
         fetchExpenses();
@@ -67,15 +86,13 @@ const Dashboard = () => {
 
     const handleEdit = (expense) => {
         setEditingId(expense.id);
-        setActiveTab('overview'); // Ensure we are on the form tab
+        setActiveTab('overview');
         setFormData({
             description: expense.description,
             amount: expense.amount,
             category_id: expense.category_id || '',
             merchant_name: expense.merchant_name || ''
         });
-        // Scroll to form if needed, or better, just ensure it's visible. 
-        // With tabs, it's right there.
     };
 
     const handleCancelEdit = () => {
@@ -120,7 +137,6 @@ const Dashboard = () => {
                             </div>
                         </button>
 
-                        {/* Profile Dropdown */}
                         <AnimatePresence>
                             {isProfileOpen && (
                                 <motion.div
@@ -146,7 +162,6 @@ const Dashboard = () => {
                         </AnimatePresence>
                     </div>
 
-                    {/* Tab Navigation */}
                     <div className="bg-white/5 p-1 rounded-xl flex items-center gap-1 backdrop-blur-md border border-white/10">
                         {tabs.map((tab) => (
                             <button
@@ -178,7 +193,6 @@ const Dashboard = () => {
                                 <FinancialSummary expenses={expenses} />
 
                                 <div className="grid gap-6 md:grid-cols-3">
-                                    {/* Add/Edit Expense Form */}
                                     <div className="md:col-span-1">
                                         <div className="glass-panel rounded-2xl p-6 sticky top-6">
                                             <h2 className="mb-6 text-lg font-medium text-emerald-400 flex items-center gap-2">
@@ -258,7 +272,6 @@ const Dashboard = () => {
                                         </div>
                                     </div>
 
-                                    {/* Transaction Lists */}
                                     <div className="md:col-span-2">
                                         <div className="glass-panel rounded-xl overflow-hidden min-h-[500px]">
                                             <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/5">
@@ -345,18 +358,47 @@ const Dashboard = () => {
                                 transition={{ duration: 0.3 }}
                                 className="space-y-6"
                             >
-                                <SpendingInsights expenses={expenses} />
+                                {/* Month Navigator Header */}
+                                <div className="glass-panel p-4 rounded-xl flex items-center justify-between relative z-50">
+                                    <h2 className="text-xl font-medium text-gray-200">Monthly Analysis</h2>
+
+                                    <div className="flex items-center gap-4 bg-black/40 p-1.5 rounded-lg border border-white/5">
+                                        <button
+                                            onClick={handlePrevMonth}
+                                            className="p-2 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors"
+                                        >
+                                            ◀
+                                        </button>
+                                        <span className="font-mono text-lg font-bold text-emerald-400 min-w-[140px] text-center">
+                                            {format(currentMonth, 'MMMM yyyy')}
+                                        </span>
+                                        <button
+                                            onClick={handleNextMonth}
+                                            className="p-2 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors"
+                                        >
+                                            ▶
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <SpendingInsights expenses={filteredExpenses} />
+
+                                <div className="mb-6">
+                                    <SpendingTrends currentMonth={currentMonth} />
+                                </div>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="glass-panel rounded-xl p-6 h-[400px]">
                                         <h3 className="text-emerald-400 font-medium mb-6 text-lg">Spending Distribution</h3>
                                         <div className="h-[300px]">
-                                            <ExpensesPieChart expenses={expenses} />
+                                            <ExpensesPieChart expenses={filteredExpenses} />
                                         </div>
                                     </div>
+
                                     <div className="glass-panel rounded-xl p-6 h-[400px]">
-                                        <h3 className="text-emerald-400 font-medium mb-6 text-lg">Monthly Trend</h3>
+                                        <h3 className="text-emerald-400 font-medium mb-6 text-lg">Top Spending Categories</h3>
                                         <div className="h-[300px]">
-                                            <MonthlyBarChart expenses={expenses} />
+                                            <CategoryBreakdown expenses={filteredExpenses} />
                                         </div>
                                     </div>
                                 </div>
