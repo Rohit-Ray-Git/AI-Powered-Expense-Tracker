@@ -15,9 +15,13 @@ const pool = new Pool({
 
 import authRoutes from './routes/auth';
 import expenseRoutes from './routes/expenses';
+import categoryRoutes from './routes/categories';
+import budgetRoutes from './routes/budgets';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/budgets', budgetRoutes);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });

@@ -11,7 +11,7 @@ const pool = new Pool({
 router.get('/', authenticateToken, async (req: any, res: Response) => {
     try {
         const result = await pool.query(
-            `SELECT e.*, c.name as category_name 
+            `SELECT e.*, c.name as category_name, c.icon as category_icon
              FROM expenses e 
              LEFT JOIN categories c ON e.category_id = c.id 
              WHERE e.user_id = $1 
@@ -37,21 +37,23 @@ router.post('/', authenticateToken, async (req: any, res: Response) => {
 
     try {
         // AI Categorization if no category provided
-        if (!category_id && merchant_name) {
+        const textToCategorize = merchant_name || description;
+        if (!category_id && textToCategorize) {
             try {
                 const mlResponse = await axios.post('http://localhost:8000/api/ml/categorize', {
-                    merchant: merchant_name,
+                    merchant: textToCategorize,
                     amount: parseFloat(amount)
                 });
                 const predictedCategory = mlResponse.data.category;
 
-                // Find or Create Category
+                // Find Category (Global or User specific)
                 let catResult = await pool.query(
-                    'SELECT id FROM categories WHERE user_id = $1 AND name = $2',
+                    'SELECT id FROM categories WHERE (user_id = $1 OR user_id IS NULL) AND name = $2',
                     [req.user.id, predictedCategory]
                 );
 
                 if (catResult.rows.length === 0) {
+                    // Create new user-specific category if not found
                     catResult = await pool.query(
                         'INSERT INTO categories (user_id, name) VALUES ($1, $2) RETURNING id',
                         [req.user.id, predictedCategory]
@@ -64,6 +66,9 @@ router.post('/', authenticateToken, async (req: any, res: Response) => {
             }
         }
 
+        // ... rest of insert logic uses category_id
+
+
         const result = await pool.query(
             `INSERT INTO expenses (user_id, amount, description, category_id, merchant_name, created_at)
        VALUES ($1, $2, $3, $4, $5, $6)
@@ -74,6 +79,31 @@ router.post('/', authenticateToken, async (req: any, res: Response) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to add expense' });
+    }
+});
+
+// Update an expense
+router.put('/:id', authenticateToken, async (req: any, res: Response) => {
+    const { id } = req.params;
+    const { amount, description, category_id, merchant_name, date } = req.body;
+
+    try {
+        const result = await pool.query(
+            `UPDATE expenses 
+             SET amount = $1, description = $2, category_id = $3, merchant_name = $4, created_at = COALESCE($5, created_at)
+             WHERE id = $6 AND user_id = $7
+             RETURNING *, (SELECT name FROM categories WHERE id = $3) as category_name, (SELECT icon FROM categories WHERE id = $3) as category_icon`,
+            [amount, description, category_id, merchant_name, date, id, req.user.id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Expense not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to update expense' });
     }
 });
 

@@ -4,6 +4,8 @@ import useAuthStore from '../store/useAuthStore';
 import { motion } from 'framer-motion';
 
 export default function Register() {
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -13,7 +15,7 @@ export default function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await register(email, password);
+            await register(`${firstName} ${lastName}`, email, password);
             navigate('/');
         } catch (err) {
             setError(err.response?.data?.error || 'Registration failed');
@@ -58,6 +60,33 @@ export default function Register() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-medium text-emerald-400/80 uppercase tracking-wider mb-2">First Name</label>
+                            <motion.input
+                                whileFocus={{ scale: 1.01, borderColor: "rgba(16, 185, 129, 0.8)" }}
+                                type="text"
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                className="input-field block w-full rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500/50 placeholder-gray-600"
+                                placeholder="John"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-emerald-400/80 uppercase tracking-wider mb-2">Last Name</label>
+                            <motion.input
+                                whileFocus={{ scale: 1.01, borderColor: "rgba(16, 185, 129, 0.8)" }}
+                                type="text"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                                className="input-field block w-full rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500/50 placeholder-gray-600"
+                                placeholder="Doe"
+                                required
+                            />
+                        </div>
+                    </div>
+
                     <div>
                         <label className="block text-xs font-medium text-emerald-400/80 uppercase tracking-wider mb-2">Email</label>
                         <motion.input

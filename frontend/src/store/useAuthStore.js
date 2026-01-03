@@ -27,8 +27,8 @@ const useAuthStore = create((set) => ({
         set({ user: res.data.user, isAuthenticated: true });
     },
 
-    register: async (email, password) => {
-        const res = await api.post('/auth/register', { email, password });
+    register: async (name, email, password) => {
+        const res = await api.post('/auth/register', { name, email, password });
         localStorage.setItem('token', res.data.token);
         set({ user: res.data.user, isAuthenticated: true });
     },

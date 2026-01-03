@@ -6,6 +6,7 @@ CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
+  name VARCHAR(255) DEFAULT 'User',
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -14,6 +15,7 @@ CREATE TABLE categories (
   user_id UUID NOT NULL REFERENCES users(id),
   name VARCHAR(100) NOT NULL,
   icon VARCHAR(50) DEFAULT '📁',
+  color VARCHAR(20) DEFAULT '#10B981',
   UNIQUE(user_id, name)
 );
 
