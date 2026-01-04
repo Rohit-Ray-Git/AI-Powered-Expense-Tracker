@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from 'date-fns';
 import api from '../lib/axios';
 
-const SpendingTrends = ({ currentMonth }) => {
+const SpendingTrends = ({ currentMonth, onDateSelect, selectedDate }) => {
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -71,7 +71,22 @@ const SpendingTrends = ({ currentMonth }) => {
                     </div>
                 ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData}>
+                        <BarChart
+                            data={chartData}
+                            onClick={(data) => {
+                                if (data && data.activePayload && data.activePayload.length > 0) {
+                                    const payload = data.activePayload[0].payload;
+                                    onDateSelect(payload.fullDate);
+                                } else if (data && data.activeTooltipIndex != null && chartData[data.activeTooltipIndex]) {
+                                    // Fallback using activeTooltipIndex which corresponds to array index
+                                    const payload = chartData[data.activeTooltipIndex];
+                                    if (payload) {
+                                        onDateSelect(payload.fullDate);
+                                    }
+                                }
+                            }}
+                            cursor="pointer"
+                        >
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                             <XAxis
                                 dataKey="name"
@@ -89,7 +104,7 @@ const SpendingTrends = ({ currentMonth }) => {
                                 tickFormatter={(value) => `₹${value}`}
                             />
                             <Tooltip
-                                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                cursor={{ fill: 'rgba(255,255,255,0.1)' }}
                                 contentStyle={{
                                     backgroundColor: '#1a1a1a',
                                     border: '1px solid rgba(255,255,255,0.1)',
@@ -104,9 +119,16 @@ const SpendingTrends = ({ currentMonth }) => {
                                     return label;
                                 }}
                             />
-                            <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
+                            <Bar
+                                dataKey="amount"
+                                radius={[4, 4, 0, 0]}
+                            >
                                 {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.amount > 0 ? '#10b981' : '#374151'} />
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={selectedDate && entry.fullDate === selectedDate ? '#34d399' : (entry.amount > 0 ? '#10b981' : '#374151')}
+                                        opacity={selectedDate && entry.fullDate !== selectedDate ? 0.3 : 1}
+                                    />
                                 ))}
                             </Bar>
                         </BarChart>

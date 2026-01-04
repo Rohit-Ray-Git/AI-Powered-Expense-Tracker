@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import useAuthStore from '../store/useAuthStore';
 import useExpenseStore from '../store/useExpenseStore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,20 @@ import SavingsSection from '../components/SavingsSection';
 const Dashboard = () => {
     const { user, logout } = useAuthStore();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const profileRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (profileRef.current && !profileRef.current.contains(event.target)) {
+                setIsProfileOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
     const {
         expenses,
         categories,
@@ -42,16 +56,31 @@ const Dashboard = () => {
     // Month View State
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
-    const handlePrevMonth = () => setCurrentMonth(prev => subMonths(prev, 1));
-    const handleNextMonth = () => setCurrentMonth(prev => addMonths(prev, 1));
+    const handlePrevMonth = () => {
+        setCurrentMonth(prev => subMonths(prev, 1));
+        setSelectedDate(null);
+    };
+    const handleNextMonth = () => {
+        setCurrentMonth(prev => addMonths(prev, 1));
+        setSelectedDate(null);
+    };
 
-    // Filter expenses for the specific selected month
+    // Analysis State
+    const [selectedDate, setSelectedDate] = useState(null);
+
+    // Filter expenses for the specific selected month or date
     const filteredExpenses = useMemo(() => {
         if (activeTab === 'analysis') {
+            if (selectedDate) {
+                return expenses.filter(expense => {
+                    const expenseDate = format(new Date(expense.created_at), 'MMM d, yyyy');
+                    return expenseDate === selectedDate;
+                });
+            }
             return expenses.filter(expense => isSameMonth(new Date(expense.created_at), currentMonth));
         }
         return expenses;
-    }, [expenses, activeTab, currentMonth]);
+    }, [expenses, activeTab, currentMonth, selectedDate]);
 
     useEffect(() => {
         fetchExpenses();
@@ -123,7 +152,7 @@ const Dashboard = () => {
 
             <main className="max-w-7xl mx-auto relative z-10">
                 <header className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="relative">
+                    <div className="relative" ref={profileRef}>
                         <button
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
                             className="flex items-center gap-3 hover:bg-white/5 p-2 rounded-xl transition-colors text-left"
@@ -391,11 +420,33 @@ const Dashboard = () => {
                                     </div>
                                 </div>
 
+                                {selectedDate && (
+                                    <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                                📅
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Viewing Data For</p>
+                                                <h3 className="text-emerald-400 font-bold text-lg">{selectedDate}</h3>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setSelectedDate(null)}
+                                            className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-sm font-medium transition-colors flex items-center gap-2"
+                                        >
+                                            <span>✕</span> Clear Filter
+                                        </button>
+                                    </div>
+                                )}
+
                                 <SpendingInsights expenses={filteredExpenses} />
 
                                 <div className="mb-6">
                                     <SpendingTrends
                                         currentMonth={currentMonth}
+                                        onDateSelect={setSelectedDate}
+                                        selectedDate={selectedDate}
                                     />
                                 </div>
 
