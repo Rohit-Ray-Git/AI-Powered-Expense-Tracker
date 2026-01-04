@@ -29,17 +29,6 @@ Stop manually selecting categories. The **ML Service** analyzes merchant names a
 
 ---
 
-## 💡 How It's Different
-
-| Traditional Trackers | AI Powered Expense Tracker |
-| :--- | :--- |
-| Passive data entry | **Proactive** insights and advice |
-| "You spent $500 on food" | "Your food spending is 20% higher than last month. Here's why..." |
-| Manual categorization | **Automatic** Machine Learning classification |
-| Static reports | **Conversational AI** interface |
-
----
-
 ## 🛠️ Technology Stack
 
 This project uses a modern, microservices-inspired architecture:
@@ -51,39 +40,164 @@ This project uses a modern, microservices-inspired architecture:
 
 ---
 
-## ⚙️ How to Run
+## ⚙️ Setup & Installation
 
-### Prerequisites
-*   Node.js & npm
-*   Python 3.8+
-*   PostgreSQL
+Follow these steps to get the application running on your local machine.
 
-### Installation
+### 1. Prerequisites
 
-1.  **Clone the repository**:
+Ensure you have the following installed:
+
+*   **Node.js** (v18+ recommended)
     ```bash
-    git clone https://github.com/Rohit-Ray-Git/AI-Powered-Expense-Tracker.git
-    cd AI-Powered-Expense-Tracker
+    node -v
+    npm -v
+    ```
+*   **Python** (v3.8+)
+    ```bash
+    python --version
+    ```
+*   **PostgreSQL** (v14+)
+    ```bash
+    psql --version
     ```
 
-2.  **Setup Databases**:
-    Ensure PostgreSQL is running and create a database (default: `expense_tracker`). Run the `init.sql` script to set up tables.
+### 2. Database Setup
 
-3.  **Configure Environment**:
-    Create `.env` files in `backend/` and `ml-service/` with your credentials (DB URL, OpenAI API Key).
-
-4.  **One-Command Start**:
-    We've included a script to launch everything at once (Frontend, Backend, and ML Service).
+1.  **Start PostgreSQL**: Ensure your Postgres service is running.
+2.  **Create User & Database**:
+    You can use the default `postgres` user, but we recommend creating a dedicated user for development.
     ```bash
-    python start_app.py
+    # Open PostgreSQL interactive terminal
+    sudo -u postgres psql
+
+    # Inside psql shell:
+    CREATE USER dev_user WITH PASSWORD 'dev_password';
+    CREATE DATABASE expense_tracker;
+    GRANT ALL PRIVILEGES ON DATABASE expense_tracker TO dev_user;
+    \q
+    ```
+3.  **Initialize Schema**:
+    Run the `init.sql` script to create the necessary tables.
+    ```bash
+    psql -U dev_user -d expense_tracker -f init.sql
+    ```
+    *(If prompted for password, enter `dev_password`)*
+
+### 3. Backend Configuration
+
+1.  Navigate to the backend directory:
+    ```bash
+    cd backend
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Create a `.env` file in the `backend/` directory:
+    ```env
+    PORT=3000
+    DATABASE_URL=postgresql://dev_user:dev_password@localhost:5432/expense_tracker
+    JWT_SECRET=your_super_secret_key_change_this
     ```
 
-5.  **Access the App**:
-    Open `http://localhost:5173` in your browser.
+### 4. ML Service Configuration
+
+1.  Navigate to the ML service directory:
+    ```bash
+    cd ../ml-service
+    ```
+2.  Install Python dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  Create a `.env` file in the `ml-service/` directory:
+    ```env
+    OPENAI_API_KEY=sk-your-openai-api-key-here
+    ```
+
+### 5. Frontend Configuration
+
+1.  Navigate to the frontend directory:
+    ```bash
+    cd ../frontend
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
 
 ---
 
-## 🔮 Future Roadmap
-*   **Receipt Scanning**: OCR to automatically add expenses from photos.
-*   **Subscription Manager**: dedicated tracking for recurring bills.
-*   **Goal Setting**: "Save for a Car" features with AI-driven milestones.
+## ▶️ Running the Application
+
+### Option A: Quick Start (Recommended)
+
+We have a helper script that launches all three services (Frontend, Backend, ML Service) simultaneously.
+
+1.  From the **root** directory:
+    ```bash
+    python start_app.py
+    ```
+2.  The app will open automatically at `http://localhost:5173`.
+
+### Option B: Manual Start (For Debugging)
+
+Open three separate terminal windows:
+
+**Terminal 1: Backend**
+```bash
+cd backend
+npm run dev
+```
+
+**Terminal 2: ML Service**
+```bash
+cd ml-service
+uvicorn app.main:app --reload --port 8000
+```
+
+**Terminal 3: Frontend**
+```bash
+cd frontend
+npm run dev
+```
+
+---
+
+## ❓ Troubleshooting
+
+**Q: "Password authentication failed for user..."**
+*   **Fix**: Double-check your `DATABASE_URL` in `backend/.env`. Ensure the password matches what you set in PostgreSQL.
+*   **Check**: Run `psql -U dev_user -d expense_tracker` to verify you can connect manually.
+
+**Q: "Cannot find module..." errors**
+*   **Fix**: Ensure you ran `npm install` in both `backend` and `frontend` folders.
+
+**Q: ML Service fails to start**
+*   **Fix**: Verify your `OPENAI_API_KEY` is correct. The ML service requires a valid key to initialize.
+
+**Q: Frontend shows "Network Error"**
+*   **Fix**: Ensure both the Backend (Port 3000) and ML Service (Port 8000) are running.
+
+---
+
+## 📂 Project Structure
+
+```
+AI-Powered-Expense-Tracker/
+├── backend/            # Express.js API
+│   ├── src/
+│   │   ├── routes/     # API endpoints
+│   │   ├── middleware/ # Auth & Validation
+│   │   └── db.ts       # Database connection
+├── frontend/           # React Application
+│   ├── src/
+│   │   ├── components/ # Reusable UI components
+│   │   └── pages/      # Main application views
+├── ml-service/         # Python FastAPI AI Service
+│   └── app/
+│       └── main.py     # AI Logic & Endpoints
+├── init.sql            # Database Schema
+└── start_app.py        # Launcher Script
+```
