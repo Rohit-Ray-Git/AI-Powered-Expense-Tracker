@@ -1,11 +1,9 @@
 import { Router, Response } from 'express';
-import { Pool } from 'pg';
+import { pool } from '../db';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
-});
+// Pool imported from ../db
 
 // Get all available categories (Global + User specific)
 router.get('/', authenticateToken, async (req: any, res: Response) => {

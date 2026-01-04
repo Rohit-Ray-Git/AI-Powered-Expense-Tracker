@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import useAuthStore from '../store/useAuthStore';
 import useExpenseStore from '../store/useExpenseStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, addMonths, subMonths, isSameMonth, startOfMonth, endOfMonth } from 'date-fns';
+import { format, isToday, isYesterday, addMonths, subMonths, isSameMonth, startOfMonth, endOfMonth } from 'date-fns';
 import ExpensesPieChart from '../components/ExpensesPieChart';
 import FinancialSummary from '../components/FinancialSummary';
 import SpendingTrends from '../components/SpendingTrends';
@@ -10,6 +10,9 @@ import BudgetSection from '../components/BudgetSection';
 import SpendingInsights from '../components/SpendingInsights';
 import AdvisorTab from '../components/AdvisorTab';
 import CategoryBreakdown from '../components/CategoryBreakdown';
+import TransactionHistoryModal from '../components/TransactionHistoryModal';
+import SavingsSection from '../components/SavingsSection';
+
 
 const Dashboard = () => {
     const { user, logout } = useAuthStore();
@@ -27,6 +30,7 @@ const Dashboard = () => {
 
     const [activeTab, setActiveTab] = useState('overview');
     const [editingId, setEditingId] = useState(null);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
     const [formData, setFormData] = useState({
         description: '',
@@ -42,15 +46,12 @@ const Dashboard = () => {
     const handleNextMonth = () => setCurrentMonth(prev => addMonths(prev, 1));
 
     // Filter expenses for the specific selected month
-    const getFilteredExpenses = () => {
-        if (!expenses) return [];
-        return expenses.filter(e => {
-            const expDate = new Date(e.created_at);
-            return isSameMonth(expDate, currentMonth);
-        });
-    };
-
-    const filteredExpenses = getFilteredExpenses();
+    const filteredExpenses = useMemo(() => {
+        if (activeTab === 'analysis') {
+            return expenses.filter(expense => isSameMonth(new Date(expense.created_at), currentMonth));
+        }
+        return expenses;
+    }, [expenses, activeTab, currentMonth]);
 
     useEffect(() => {
         fetchExpenses();
@@ -109,6 +110,7 @@ const Dashboard = () => {
         { id: 'overview', label: 'Overview', icon: '⚡' },
         { id: 'analysis', label: 'Analysis', icon: '📊' },
         { id: 'budgets', label: 'Budgets', icon: '💰' },
+        { id: 'savings', label: 'Savings', icon: '🎯' },
         { id: 'advisor', label: 'Advisor', icon: '🤖' },
     ];
 
@@ -273,16 +275,21 @@ const Dashboard = () => {
                                     </div>
 
                                     <div className="md:col-span-2">
-                                        <div className="glass-panel rounded-xl overflow-hidden min-h-[500px]">
+                                        <div className="glass-panel rounded-xl overflow-hidden min-h-[500px] flex flex-col">
                                             <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/5">
-                                                <h2 className="text-lg font-medium text-emerald-400">Recent Transactions</h2>
-                                                <span className="text-xs text-gray-500 uppercase tracking-wider">{expenses.length} Records</span>
+                                                <h2 className="text-lg font-medium text-emerald-400">Recent Activity</h2>
+                                                <button
+                                                    onClick={() => setIsHistoryOpen(true)}
+                                                    className="text-xs text-emerald-400 hover:text-emerald-300 font-medium uppercase tracking-wider transition-colors"
+                                                >
+                                                    See All
+                                                </button>
                                             </div>
 
                                             {isLoading ? (
                                                 <div className="p-12 text-center text-gray-500 animate-pulse">Loading data...</div>
                                             ) : expenses.length === 0 ? (
-                                                <div className="p-12 text-center text-gray-500 flex flex-col items-center gap-4">
+                                                <div className="flex-1 flex flex-col items-center justify-center text-gray-500 gap-4 p-12">
                                                     <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
                                                         <span className="text-2xl">💸</span>
                                                     </div>
@@ -291,55 +298,58 @@ const Dashboard = () => {
                                             ) : (
                                                 <ul className="divide-y divide-white/5">
                                                     <AnimatePresence initial={false}>
-                                                        {expenses.map((expense, index) => (
-                                                            <motion.li
-                                                                key={expense.id}
-                                                                initial={{ opacity: 0, height: 0 }}
-                                                                animate={{ opacity: 1, height: "auto" }}
-                                                                exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
-                                                                transition={{ duration: 0.3, delay: index * 0.05 }}
-                                                                className="flex justify-between items-center px-6 py-4 hover:bg-white/5 transition-colors group"
-                                                            >
-                                                                <div className="flex items-start gap-4 trans">
-                                                                    <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 text-xl">
-                                                                        {expense.category_icon || '💲'}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-medium text-gray-200 group-hover:text-white transition-colors">{expense.description}</p>
-                                                                        <div className="flex items-center gap-2 mt-1">
-                                                                            {expense.category_name && (
-                                                                                <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                                                                                    {expense.category_name}
-                                                                                </span>
-                                                                            )}
-                                                                            <span className="text-xs text-gray-500">
-                                                                                {expense.merchant_name ? `${expense.merchant_name} • ` : ''}
-                                                                                {new Date(expense.created_at).toLocaleDateString()}
-                                                                            </span>
+                                                        {expenses.slice(0, 5).map((expense, index) => {
+                                                            const date = new Date(expense.created_at);
+                                                            let dateLabel = format(date, 'MMM d');
+                                                            if (isToday(date)) dateLabel = 'Today';
+                                                            else if (isYesterday(date)) dateLabel = 'Yesterday';
+
+                                                            return (
+                                                                <motion.li
+                                                                    key={expense.id}
+                                                                    initial={{ opacity: 0, height: 0 }}
+                                                                    animate={{ opacity: 1, height: "auto" }}
+                                                                    exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
+                                                                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                                                                    className="flex justify-between items-center px-6 py-4 hover:bg-white/5 transition-colors group"
+                                                                >
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-xl border border-white/10">
+                                                                            {expense.category_icon || '💲'}
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="font-medium text-gray-200 group-hover:text-white transition-colors">{expense.description}</p>
+                                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{dateLabel}</span>
+                                                                                <span className="text-gray-600 text-[10px]">•</span>
+                                                                                <span className="text-xs text-gray-400">{expense.category_name}</span>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                                <div className="flex items-center gap-6">
-                                                                    <span className="font-mono font-medium text-emerald-300 text-lg">
-                                                                        -₹{Number(expense.amount).toFixed(2)}
-                                                                    </span>
-                                                                    <button
-                                                                        onClick={() => handleEdit(expense)}
-                                                                        className="text-gray-600 hover:text-emerald-400 transition-colors opacity-0 group-hover:opacity-100 p-2 hover:bg-emerald-500/10 rounded-md"
-                                                                        title="Edit"
-                                                                    >
-                                                                        ✎
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => deleteExpense(expense.id)}
-                                                                        className="text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/10 rounded-md"
-                                                                        title="Delete"
-                                                                    >
-                                                                        ✕
-                                                                    </button>
-                                                                </div>
-                                                            </motion.li>
-                                                        ))}
+                                                                    <div className="flex items-center gap-4">
+                                                                        <span className="font-mono font-medium text-emerald-300">
+                                                                            -₹{Number(expense.amount).toLocaleString()}
+                                                                        </span>
+                                                                        <div className="flex opacity-0 group-hover:opacity-100 transition-opacity gap-2">
+                                                                            <button
+                                                                                onClick={() => handleEdit(expense)}
+                                                                                className="text-gray-500 hover:text-emerald-400 p-1.5 hover:bg-white/10 rounded-md transition-colors"
+                                                                                title="Edit"
+                                                                            >
+                                                                                ✎
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => deleteExpense(expense.id)}
+                                                                                className="text-gray-500 hover:text-red-400 p-1.5 hover:bg-white/10 rounded-md transition-colors"
+                                                                                title="Delete"
+                                                                            >
+                                                                                ✕
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </motion.li>
+                                                            )
+                                                        })}
                                                     </AnimatePresence>
                                                 </ul>
                                             )}
@@ -384,7 +394,9 @@ const Dashboard = () => {
                                 <SpendingInsights expenses={filteredExpenses} />
 
                                 <div className="mb-6">
-                                    <SpendingTrends currentMonth={currentMonth} />
+                                    <SpendingTrends
+                                        currentMonth={currentMonth}
+                                    />
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -417,6 +429,18 @@ const Dashboard = () => {
                             </motion.div>
                         )}
 
+                        {activeTab === 'savings' && (
+                            <motion.div
+                                key="savings"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <SavingsSection />
+                            </motion.div>
+                        )}
+
                         {activeTab === 'advisor' && (
                             <motion.div
                                 key="advisor"
@@ -431,6 +455,12 @@ const Dashboard = () => {
                     </AnimatePresence>
                 </div>
             </main>
+
+            <TransactionHistoryModal
+                isOpen={isHistoryOpen}
+                onClose={() => setIsHistoryOpen(false)}
+                expenses={expenses}
+            />
         </div>
     );
 }
