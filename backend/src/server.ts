@@ -7,7 +7,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-    origin: ['https://artha-ai.vercel.app', 'http://localhost:5173'],
+    origin: ['https://artha-ai.vercel.app', 'https://artha-ai-nine.vercel.app', 'http://localhost:5173'],
     credentials: true
 }));
 app.use(express.json());
