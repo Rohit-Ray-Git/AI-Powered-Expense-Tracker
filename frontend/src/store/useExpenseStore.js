@@ -103,7 +103,8 @@ const useExpenseStore = create((set, get) => ({
 
             set({ isAdviceLoading: true });
 
-            const response = await fetch('http://localhost:8000/api/ml/audit', {
+            const mlApiUrl = import.meta.env.VITE_ML_API_URL || 'http://localhost:8000';
+            const response = await fetch(`${mlApiUrl}/api/ml/audit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -139,7 +140,8 @@ const useExpenseStore = create((set, get) => ({
         set({ chatMessages: newMessages, isChatLoading: true });
 
         try {
-            const response = await fetch('http://localhost:8000/api/ml/chat', {
+            const mlApiUrl = import.meta.env.VITE_ML_API_URL || 'http://localhost:8000';
+            const response = await fetch(`${mlApiUrl}/api/ml/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
