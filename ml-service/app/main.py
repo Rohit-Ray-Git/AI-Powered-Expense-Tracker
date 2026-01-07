@@ -163,14 +163,17 @@ class ChatRequest(BaseModel):
 async def chat_with_advisor(data: ChatRequest):
     try:
         # Prepare context
-        expenses_text = "\n".join([f"- {e.description}: {e.amount} ({e.category})" for e in data.context[:20]])
+        expenses_text = "\n".join([f"- {e.date[:10]} | {e.description}: {e.amount} ({e.category})" for e in data.context[:100]])
         
         system_prompt = f"""
         You are a helpful, friendly, and savvy financial coach. 
-        You have access to the user's recent expenses:
+        You have access to the user's recent expenses (Format: Date | Description: Amount (Category)):
         {expenses_text}
         
-        Answer the user's questions based on this data. 
+        Answer the user's questions based on this data.
+        **ALWAYS use Indian Rupees (₹) for currency.**
+        If the user asks about a specific date (e.g., "5th Dec"), look for transactions matching that date.
+        If they ask for "maximum transaction", find it in the list.
         Be concise (max 2-3 sentences). 
         If asked about savings, point out specific wasteful spending from the list.
         If the user asks something unrelated to finance, politely steer them back to money topics.

@@ -50,7 +50,9 @@ const Dashboard = () => {
         description: '',
         amount: '',
         category_id: '',
-        merchant_name: ''
+        category_id: '',
+        merchant_name: '',
+        date: new Date().toISOString().slice(0, 16) // Default to current time for datetime-local
     });
 
     // Month View State
@@ -108,7 +110,9 @@ const Dashboard = () => {
                 description: '',
                 amount: '',
                 category_id: '',
-                merchant_name: ''
+                category_id: '',
+                merchant_name: '',
+                date: new Date().toISOString().slice(0, 16)
             });
             setEditingId(null);
         }
@@ -121,7 +125,9 @@ const Dashboard = () => {
             description: expense.description,
             amount: expense.amount,
             category_id: expense.category_id || '',
-            merchant_name: expense.merchant_name || ''
+            category_id: expense.category_id || '',
+            merchant_name: expense.merchant_name || '',
+            date: expense.created_at ? new Date(expense.created_at).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16)
         });
     };
 
@@ -131,7 +137,9 @@ const Dashboard = () => {
             description: '',
             amount: '',
             category_id: '',
-            merchant_name: ''
+            category_id: '',
+            merchant_name: '',
+            date: new Date().toISOString().slice(0, 16)
         });
     };
 
@@ -280,6 +288,16 @@ const Dashboard = () => {
                                                         onChange={(e) => setFormData({ ...formData, merchant_name: e.target.value })}
                                                         className="input-field block w-full rounded-lg p-2.5 text-sm placeholder-gray-600"
                                                         placeholder="Optional"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Date & Time</label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        value={formData.date}
+                                                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                                        className="input-field block w-full rounded-lg p-2.5 text-sm placeholder-gray-600 [color-scheme:dark]"
+                                                        required
                                                     />
                                                 </div>
                                                 <motion.button

@@ -13,8 +13,7 @@ commands = [
     },
     {
         "name": "ML Service",
-        # Check if 'uv' is available or just use uvicorn directly if in venv. 
-        # User has been using 'uv run', so we stick to that.
+        # Use 'uv run' to leverage the project's virtual environment and dependencies
         "cmd": ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"],
         "cwd": "ml-service"
     },

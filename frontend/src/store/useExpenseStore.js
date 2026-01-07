@@ -144,7 +144,7 @@ const useExpenseStore = create((set, get) => ({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message,
-                    context: expenses.slice(0, 20).map(e => ({
+                    context: expenses.slice(0, 100).map(e => ({
                         description: e.description,
                         amount: parseFloat(e.amount),
                         category: e.category_name || "Uncategorized",
