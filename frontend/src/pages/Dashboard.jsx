@@ -50,7 +50,6 @@ const Dashboard = () => {
         description: '',
         amount: '',
         category_id: '',
-        category_id: '',
         merchant_name: '',
         date: new Date().toISOString().slice(0, 16) // Default to current time for datetime-local
     });
