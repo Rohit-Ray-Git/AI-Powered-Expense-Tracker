@@ -160,61 +160,67 @@ const Dashboard = () => {
 
             <main className="max-w-7xl mx-auto relative z-10">
                 <header className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="relative" ref={profileRef}>
-                        <button
-                            onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            className="flex items-center gap-3 hover:bg-white/5 p-2 rounded-xl transition-colors text-left"
-                        >
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center font-bold text-lg text-white shadow-lg">
-                                {user?.name?.[0]?.toUpperCase() || 'U'}
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
-                                    Financial Dashboard
-                                </h1>
-                                <p className="text-xs text-gray-400">Welcome back, {user?.name || 'User'}</p>
-                            </div>
-                        </button>
-
-                        <AnimatePresence>
-                            {isProfileOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 10 }}
-                                    className="absolute top-full left-0 mt-2 w-64 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
-                                >
-                                    <div className="p-4 border-b border-white/5">
-                                        <p className="text-sm font-medium text-white">{user?.name}</p>
-                                        <p className="text-xs text-gray-400">{user?.email}</p>
-                                    </div>
-                                    <div className="p-2">
-                                        <button
-                                            onClick={logout}
-                                            className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2"
-                                        >
-                                            <span>🚪</span> Sign Out
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                    {/* Branding Section */}
+                    <div>
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
+                            Artha-AI
+                        </h1>
+                        <p className="text-xs text-gray-400">Financial Wisdom</p>
                     </div>
 
-                    <div className="bg-white/5 p-1 rounded-xl flex items-center gap-1 backdrop-blur-md border border-white/10">
-                        {tabs.map((tab) => (
+                    <div className="flex items-center gap-4">
+                        {/* Navigation Tabs */}
+                        <div className="bg-white/5 p-1 rounded-xl flex items-center gap-1 backdrop-blur-md border border-white/10 overflow-x-auto max-w-[calc(100vw-100px)] md:max-w-none">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${activeTab === tab.id
+                                        ? 'bg-emerald-500/20 text-emerald-400 shadow-sm'
+                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                        }`}
+                                >
+                                    <span>{tab.icon}</span>
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Profile Section */}
+                        <div className="relative" ref={profileRef}>
                             <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${activeTab === tab.id
-                                    ? 'bg-emerald-500/20 text-emerald-400 shadow-sm'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                    }`}
+                                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                className="hover:bg-white/5 p-1 rounded-full transition-colors"
                             >
-                                <span>{tab.icon}</span>
-                                {tab.label}
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center font-bold text-lg text-white shadow-lg ring-2 ring-white/10">
+                                    {user?.name?.[0]?.toUpperCase() || 'U'}
+                                </div>
                             </button>
-                        ))}
+
+                            <AnimatePresence>
+                                {isProfileOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        className="absolute top-full right-0 mt-2 w-64 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 origin-top-right backdrop-blur-xl"
+                                    >
+                                        <div className="p-4 border-b border-white/5 bg-white/5">
+                                            <p className="text-sm font-medium text-white">{user?.name}</p>
+                                            <p className="text-xs text-gray-400">{user?.email}</p>
+                                        </div>
+                                        <div className="p-2">
+                                            <button
+                                                onClick={logout}
+                                                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2"
+                                            >
+                                                <span>🚪</span> Sign Out
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </header>
 
