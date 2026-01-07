@@ -1,27 +1,32 @@
-# 💰 AI Powered Expense Tracker
+# 💰 Artha-AI
 
-**Not just a tracker. A personal Financial Coach.**
+**Financial Wisdom for the Modern Age.**
 
-Traditional expense trackers are passive—they just record what you spent. This application uses **Artificial Intelligence** to actively analyze your habits, identify waste, and answer your financial questions in real-time.
+Traditional expense trackers are passive—they just record what you spent. **Artha-AI** uses Artificial Intelligence to actively analyze your habits, find savings, and guide you toward financial freedom.
 
 ![Dashboard Preview](assets/dashboard.png)
 
 ## 🚀 Key Features
+
+### 📅 Date & Time Logging (New!)
+-   **Precise Tracking**: Log transactions with exact date and time.
+-   **History Travel**: Add past transactions (e.g., "Dinner last Friday") and the AI will understand exactly when it happened.
 
 ### 🤖 AI Financial Coach
 The standout feature of this app. It doesn't just show charts; it *understands* them.
 
 ![AI Coach & Chat](assets/advisor.png)
 
-*   **Smart Audits**: Automatically scans your recent transactions to find savings opportunities (e.g., "You spent ₹2,000 on coffee this month. Cutting back could save you ₹24k/year").
-*   **Interactive Chat**: Have a conversation with your data! Ask questions like *"Can I afford a vacation?"* or *"How much did I spend on Uber?"*, and get instant, personalized answers.
+*   **Smart Audits**: Automatically scans your recent transactions to find savings opportunities.
+*   **Time-Aware**: Ask *"What did I spend last December?"* or *"Show expenses for Oct 5th"* and get instant answers.
+*   **Currency**: Fully optimized for **Indian Rupees (₹)**.
 
 ### ⚡ Smart Categorization
 Stop manually selecting categories. The **ML Service** analyzes merchant names and automatically classifies transactions (e.g., "Starbucks" -> "Food", "Uber" -> "Transportation").
 
 ### 📊 Comprehensive Dashboard
 *   **Overview**: Quick snapshot of total spend and recent activity.
-*   **Analysis**: Deep dive into spending patterns with interactive charts.
+*   **Analysis**: Deep dive into spending patterns with detailed charts.
 
 ![Deep Dive Analysis](assets/analysis.png)
 
