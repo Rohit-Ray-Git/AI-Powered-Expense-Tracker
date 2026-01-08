@@ -9,23 +9,31 @@ const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 
 // Register
 router.post('/register', async (req: Request, res: Response) => {
+    console.log('📝 Register endpoint hit');
     const { email, password, name } = req.body;
+    console.log('📝 Received:', { email, name, hasPassword: !!password });
+
     if (!email || !password || !name) {
+        console.log('❌ Missing required fields');
         return res.status(400).json({ error: 'Name, email and password required' });
     }
 
     try {
+        console.log('📝 Hashing password...');
         const hashedPassword = await bcrypt.hash(password, 10);
+        console.log('📝 Inserting into database...');
         const result = await pool.query(
             'INSERT INTO users (email, password_hash, name) VALUES ($1, $2, $3) RETURNING id, email, name',
             [email, hashedPassword, name]
         );
 
         const user = result.rows[0];
+        console.log('✅ User created:', user);
         const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
 
         res.status(201).json({ user, token });
     } catch (error: any) {
+        console.error('❌ Registration error:', error);
         if (error.code === '23505') { // Unique violation
             return res.status(400).json({ error: 'Email already exists' });
         }

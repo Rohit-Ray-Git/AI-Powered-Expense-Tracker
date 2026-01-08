@@ -3,11 +3,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const isProduction = process.env.NODE_ENV === 'production';
+// Enable SSL for cloud databases (when DATABASE_URL is set)
+const useSSL = !!process.env.DATABASE_URL;
 
 export const pool = new Pool({
     connectionString: process.env.DATABASE_URL || 'postgresql://dev_user:dev_password@localhost:5432/expense_tracker',
-    ssl: isProduction ? { rejectUnauthorized: false } : undefined
+    ssl: useSSL ? { rejectUnauthorized: false } : undefined
 });
 
 pool.on('error', (err) => {
