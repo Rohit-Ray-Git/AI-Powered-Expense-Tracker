@@ -30,6 +30,10 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
+app.get('/', (req, res) => {
+    res.send('API is running successfully');
+});
+
 // Basic Expense Routes
 app.get('/api/expenses', async (req, res) => {
     try {
