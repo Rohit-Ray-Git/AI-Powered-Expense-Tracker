@@ -6,8 +6,31 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
+
+// Dynamic CORS configuration to allow all Vercel deployments
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+];
+
 app.use(cors({
-    origin: ['https://artha-ai.vercel.app', 'https://artha-ai-nine.vercel.app', 'http://localhost:5173', 'https://ai-powered-expense-tracker-phi.vercel.app'],
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        // Allow all Vercel deployments
+        if (origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+
+        // Allow explicitly listed origins
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        console.log('❌ CORS blocked origin:', origin);
+        callback(new Error('Not allowed by CORS'));
+    },
     credentials: true
 }));
 app.use(express.json());
